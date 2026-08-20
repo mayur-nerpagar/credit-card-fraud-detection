@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Credit Card Fraud Detection
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #eef2ff,
+                    #f8fafc
+                );
+
+            color: #1e293b;
+        }
+
+
+        .container {
+
+            max-width: 850px;
+
+            margin: auto;
+
+            padding: 40px 20px;
+        }
+
+
+        /* ====================================================
+           HEADER
+           ==================================================== */
+
+        .header {
+
+            text-align: center;
+
+            margin-bottom: 28px;
+        }
+
+
+        .header h1 {
+
+            margin: 0 0 10px;
+
+            font-size: 34px;
+        }
+
+
+        .header p {
+
+            margin: 0;
+
+            color: #64748b;
+
+            font-size: 15px;
+        }
+
+
+        /* ====================================================
+           CARD
+           ==================================================== */
+
+        .card {
+
+            background: white;
+
+            padding: 30px;
+
+            border-radius: 18px;
+
+            box-shadow:
+                0 15px 40px
+                rgba(15, 23, 42, 0.10);
+        }
+
+
+        .section-title {
+
+            margin-top: 0;
+
+            margin-bottom: 24px;
+
+            font-size: 21px;
+        }
+
+
+        /* ====================================================
+           FORM
+           ==================================================== */
+
+        .form-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 20px;
+        }
+
+
+        .form-group {
+
+            display: flex;
+
+            flex-direction: column;
+        }
+
+
+        label {
+
+            margin-bottom: 7px;
+
+            font-size: 14px;
+
+            font-weight: 600;
+        }
+
+
+        input,
+        select {
+
+            width: 100%;
+
+            padding: 12px;
+
+            border:
+                1px solid #cbd5e1;
+
+            border-radius: 9px;
+
+            font-size: 15px;
+
+            background: white;
+        }
+
+
+        input:focus,
+        select:focus {
+
+            outline: none;
+
+            border-color: #2563eb;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(37, 99, 235, 0.10);
+        }
+
+
+        .help {
+
+            margin-top: 5px;
+
+            font-size: 12px;
+
+            color: #94a3b8;
+        }
+
+
+        /* ====================================================
+           BUTTON
+           ==================================================== */
+
+        .button-container {
+
+            margin-top: 25px;
+        }
+
+
+        button {
+
+            width: 100%;
+
+            padding: 14px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: #2563eb;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+
+        button:hover {
+
+            background: #1d4ed8;
+        }
+
+
+        button:disabled {
+
+            background: #93c5fd;
+
+            cursor: not-allowed;
+        }
+
+
+        /* ====================================================
+           LOADING
+           ==================================================== */
+
+        .loading {
+
+            display: none;
+
+            text-align: center;
+
+            margin-top: 18px;
+
+            color: #64748b;
+        }
+
+
+        /* ====================================================
+           RESULT
+           ==================================================== */
+
+        .result {
+
+            display: none;
+
+            margin-top: 25px;
+
+            padding: 25px;
+
+            border-radius: 14px;
+
+            text-align: center;
+        }
+
+
+        .result.fraud {
+
+            display: block;
+
+            background: #fef2f2;
+
+            border:
+                1px solid #fca5a5;
+        }
+
+
+        .result.legitimate {
+
+            display: block;
+
+            background: #ecfdf5;
+
+            border:
+                1px solid #86efac;
+        }
+
+
+        .result-title {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+            margin-bottom: 12px;
+        }
+
+
+        .probability {
+
+            font-size: 42px;
+
+            font-weight: 800;
+
+            margin: 10px 0;
+        }
+
+
+        .risk {
+
+            display: inline-block;
+
+            padding: 7px 15px;
+
+            border-radius: 20px;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            background: #e2e8f0;
+
+            margin-top: 8px;
+        }
+
+
+        .description {
+
+            margin-top: 12px;
+
+            color: #64748b;
+
+            font-size: 14px;
+        }
+
+
+        /* ====================================================
+           ERROR
+           ==================================================== */
+
+        .error {
+
+            display: none;
+
+            margin-top: 20px;
+
+            padding: 14px;
+
+            border-radius: 9px;
+
+            background: #fef2f2;
+
+            border:
+                1px solid #fca5a5;
+
+            color: #b91c1c;
+
+            font-size: 14px;
+        }
+
+
+        /* ====================================================
+           FOOTER
+           ==================================================== */
+
+        .footer {
+
+            text-align: center;
+
+            margin-top: 20px;
+
+            color: #94a3b8;
+
+            font-size: 12px;
+        }
+
+
+        /* ====================================================
+           RESPONSIVE
+           ==================================================== */
+
+        @media (max-width: 650px) {
+
+            .form-grid {
+
+                grid-template-columns: 1fr;
+            }
+
+
+            .header h1 {
+
+                font-size: 27px;
+            }
+
+
+            .card {
+
+                padding: 22px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="header">
+
+        <h1>
+            Credit Card Fraud Detection
+        </h1>
+
+        <p>
+            AI-powered transaction risk analysis
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         MAIN CARD
+         ===================================================== -->
+
+    <div class="card">
+
+
+        <h2 class="section-title">
+            Enter Transaction Details
+        </h2>
+
+
+        <form id="fraudForm">
+
+
+            <div class="form-grid">
+
+
+                <!-- Transaction Amount -->
+
+                <div class="form-group">
+
+                    <label for="amount">
+                        Transaction Amount
+                    </label>
+
+                    <input
+                        type="number"
+                        id="amount"
+                        min="0"
+                        step="0.01"
+                        placeholder="e.g. 2500"
+                        required
+                    >
+
+                    <span class="help">
+                        Amount of the transaction
+                    </span>
+
+                </div>
+
+
+                <!-- Transaction Hour -->
+
+                <div class="form-group">
+
+                    <label for="transaction_hour">
+                        Transaction Hour
+                    </label>
+
+                    <input
+                        type="number"
+                        id="transaction_hour"
+                        min="0"
+                        max="23"
+                        placeholder="0 - 23"
+                        required
+                    >
+
+                    <span class="help">
+                        Hour when the transaction occurred
+                    </span>
+
+                </div>
+
+
+                <!-- Merchant -->
+
+                <div class="form-group">
+
+                    <label for="merchant_category">
+                        Merchant Category
+                    </label>
+
+                    <select
+                        id="merchant_category"
+                        required
+                    >
+
+                        <option value="">
+                            Select category
+                        </option>
+
+                        <option value="Electronics">
+                            Electronics
+                        </option>
+
+                        <option value="Grocery">
+                            Grocery
+                        </option>
+
+                        <option value="Travel">
+                            Travel
+                        </option>
+
+                        <option value="Restaurant">
+                            Restaurant
+                        </option>
+
+                        <option value="Entertainment">
+                            Entertainment
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Foreign Transaction -->
+
+                <div class="form-group">
+
+                    <label for="foreign_transaction">
+                        Was this a foreign transaction?
+                    </label>
+
+                    <select
+                        id="foreign_transaction"
+                        required
+                    >
+
+                        <option value="">
+                            Select option
+                        </option>
+
+                        <option value="0">
+                            No
+                        </option>
+
+                        <option value="1">
+                            Yes
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Cardholder Age -->
+
+                <div class="form-group">
+
+                    <label for="cardholder_age">
+                        Cardholder Age
+                    </label>
+
+                    <input
+                        type="number"
+                        id="cardholder_age"
+                        min="18"
+                        max="100"
+                        placeholder="e.g. 30"
+                        required
+                    >
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =================================================
+                 BUTTON
+                 ================================================= -->
+
+            <div class="button-container">
+
+                <button
+                    type="submit"
+                    id="predictButton"
+                >
+
+                    Check Transaction
+
+                </button>
+
+            </div>
+
+
+        </form>
+
+
+        <!-- =====================================================
+             LOADING
+             ===================================================== -->
+
+        <div
+            class="loading"
+            id="loading"
+        >
+
+            Analyzing transaction with machine learning model...
+
+        </div>
+
+
+        <!-- =====================================================
+             ERROR
+             ===================================================== -->
+
+        <div
+            class="error"
+            id="error"
+        ></div>
+
+
+        <!-- =====================================================
+             RESULT
+             ===================================================== -->
+
+        <div
+            class="result"
+            id="result"
+        >
+
+            <div
+                class="result-title"
+                id="resultTitle"
+            ></div>
+
+
+            <div
+                class="probability"
+                id="probability"
+            ></div>
+
+
+            <div
+                class="risk"
+                id="risk"
+            ></div>
+
+
+            <div
+                class="description"
+                id="description"
+            ></div>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="footer">
+
+        XGBoost • FastAPI • Python
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+// ============================================================
+// ELEMENTS
+// ============================================================
+
+const form =
+    document.getElementById(
+        "fraudForm"
+    );
+
+
+const button =
+    document.getElementById(
+        "predictButton"
+    );
+
+
+const loading =
+    document.getElementById(
+        "loading"
+    );
+
+
+const result =
+    document.getElementById(
+        "result"
+    );
+
+
+const resultTitle =
+    document.getElementById(
+        "resultTitle"
+    );
+
+
+const probability =
+    document.getElementById(
+        "probability"
+    );
+
+
+const risk =
+    document.getElementById(
+        "risk"
+    );
+
+
+const description =
+    document.getElementById(
+        "description"
+    );
+
+
+const error =
+    document.getElementById(
+        "error"
+    );
+
+
+// ============================================================
+// FORM SUBMISSION
+// ============================================================
+
+form.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        // ----------------------------------------------------
+        // Reset previous result
+        // ----------------------------------------------------
+
+        result.className =
+            "result";
+
+        error.style.display =
+            "none";
+
+        loading.style.display =
+            "block";
+
+        button.disabled =
+            true;
+
+
+        // ----------------------------------------------------
+        // Collect user input
+        // ----------------------------------------------------
+
+        const transaction = {
+
+            amount:
+                parseFloat(
+                    document.getElementById(
+                        "amount"
+                    ).value
+                ),
+
+            transaction_hour:
+                parseInt(
+                    document.getElementById(
+                        "transaction_hour"
+                    ).value
+                ),
+
+            merchant_category:
+                document.getElementById(
+                    "merchant_category"
+                ).value,
+
+            foreign_transaction:
+                parseInt(
+                    document.getElementById(
+                        "foreign_transaction"
+                    ).value
+                ),
+
+            cardholder_age:
+                parseInt(
+                    document.getElementById(
+                        "cardholder_age"
+                    ).value
+                )
+
+        };
+
+
+        // ----------------------------------------------------
+        // Send transaction to FastAPI
+        // ----------------------------------------------------
+
+        try {
+
+            const response =
+                await fetch(
+                    "/predict",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body:
+                            JSON.stringify(
+                                transaction
+                            )
+
+                    }
+                );
+
+
+            // ------------------------------------------------
+            // Check API response
+            // ------------------------------------------------
+
+            if (!response.ok) {
+
+                const errorData =
+                    await response.json()
+                        .catch(
+                            () => null
+                        );
+
+                throw new Error(
+                    errorData?.detail
+                    ||
+                    "Prediction failed."
+                );
+
+            }
+
+
+            // ------------------------------------------------
+            // Read result
+            // ------------------------------------------------
+
+            const data =
+                await response.json();
+
+
+            probability.textContent =
+                data.fraud_probability
+                + "%";
+
+
+            risk.textContent =
+                "Risk Level: "
+                + data.risk_level;
+
+
+            // ------------------------------------------------
+            // Fraud
+            // ------------------------------------------------
+
+            if (
+                data.prediction === 1
+            ) {
+
+                result.className =
+                    "result fraud";
+
+
+                resultTitle.textContent =
+                    "⚠ Potential Fraud";
+
+
+                description.textContent =
+                    "The machine learning model detected patterns associated with fraudulent activity.";
+
+            }
+
+
+            // ------------------------------------------------
+            // Legitimate
+            // ------------------------------------------------
+
+            else {
+
+                result.className =
+                    "result legitimate";
+
+
+                resultTitle.textContent =
+                    "✓ Legitimate Transaction";
+
+
+                description.textContent =
+                    "The transaction appears legitimate based on the model's analysis.";
+
+            }
+
+        }
+
+
+        catch (err) {
+
+            console.error(err);
+
+
+            error.textContent =
+                "Unable to analyze transaction: "
+                + err.message;
+
+
+            error.style.display =
+                "block";
+
+        }
+
+
+        finally {
+
+            loading.style.display =
+                "none";
+
+            button.disabled =
+                false;
+
+        }
+
+    }
+);
+
+
+</script>
+
+
+</body>
+
+</html>
